@@ -6,8 +6,6 @@ AddCSLuaFile("starfall/permissions/core.lua")
 AddCSLuaFile("starfall/transfer.lua")
 AddCSLuaFile("starfall/editor/editor.lua")
 
-resource.AddWorkshop("2273610511")
-
 SF = {}
 SF.Version = "StarfallEx"
 local files, directories = file.Find( "addons/*", "GAME" )
