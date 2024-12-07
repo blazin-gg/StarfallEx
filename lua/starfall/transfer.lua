@@ -188,6 +188,7 @@ if SERVER then
 				if #sfdata.mainfile > 0 then
 					sfdata.owner = ply
 					updata.callback(sfdata)
+					hook.Run("Starfall_ScriptUploaded", ply, sfdata)
 				end
 			else
 				if uploaddata[ply] == updata then
@@ -207,6 +208,7 @@ if SERVER then
 			if sf.sfdata.mainfile ~= sfdata.mainfile or sf.sfdata.owner ~= ply then return end
 			sfdata.owner = ply
 			sf:Compile(sfdata)
+			hook.Run("Starfall_ScriptUploaded", ply, sfdata)
 		end)
 	end)
 
