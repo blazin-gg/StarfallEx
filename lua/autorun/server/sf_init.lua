@@ -7,27 +7,24 @@ AddCSLuaFile("starfall/transfer.lua")
 AddCSLuaFile("starfall/editor/editor.lua")
 
 SF = {}
-SF.Version = "StarfallEx"
-local files, directories = file.Find( "addons/*", "GAME" )
-local sf_dir = nil
-for k,v in pairs(directories) do
-	if file.Exists("addons/"..v.."/lua/starfall/sflib.lua", "GAME") then
-		sf_dir = "addons/"..v.."/"
-		break
-	end
-end
-if sf_dir then
-	local head = file.Read(sf_dir..".git/HEAD","GAME") -- Where head points to
-	if head then
-		head = head:sub(6,-2) -- skipping ref: and new line
-		local lastCommit = file.Read( sf_dir..".git/"..head, "GAME")
-
-		if lastCommit then
-			SF.Version = SF.Version .. "_" .. lastCommit:sub(1,7) -- We need only first 7 to be safely unique
-		end
-	end
-end
+SF.Version = "StarfallEx_Blazin.gg"
 SetGlobalString("SF.Version", SF.Version)
 
+list.Set("Starfall_gate_Models", "models/spacecode/sfchip.mdl", true)
+list.Set("Starfall_gate_Models", "models/spacecode/sfchip_medium.mdl", true)
+list.Set("Starfall_gate_Models", "models/spacecode/sfchip_small.mdl", true)
+
+list.Set("Starfall_component_Models", "models/cheeze/pcb/pcb4.mdl", true)
+list.Set("Starfall_component_Models", "models/cheeze/pcb/pcb5.mdl", true)
+list.Set("Starfall_component_Models", "models/cheeze/pcb/pcb6.mdl", true)
+list.Set("Starfall_component_Models", "models/cheeze/pcb/pcb7.mdl", true)
+list.Set("Starfall_component_Models", "models/cheeze/pcb/pcb8.mdl", true)
+list.Set("Starfall_component_Models", "models/cheeze/pcb2/pcb8.mdl", true)
+list.Set("Starfall_component_Models", "models/hunter/blocks/cube1x1x1.mdl", true)
+list.Set("Starfall_component_Models", "models/hunter/plates/plate05x05.mdl", true)
+list.Set("Starfall_component_Models", "models/hunter/plates/plate1x1.mdl", true)
+list.Set("Starfall_component_Models", "models/hunter/plates/plate4x4.mdl", true)
+list.Set("Starfall_component_Models", "models/kobilica/wiremonitorbig.mdl", true)
+list.Set("Starfall_component_Models", "models/kobilica/wiremonitorsmall.mdl", true)
 
 include("starfall/sflib.lua")

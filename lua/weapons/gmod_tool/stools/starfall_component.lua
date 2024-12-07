@@ -126,6 +126,9 @@ function TOOL:LeftClick(trace)
 	local component_type = self:GetClientInfo("Type")
 	if component_type == "1" then
 		local model = self:GetClientInfo("Model")
+		
+		if not self:CanUseModel(model) then return false end
+
 		if not (util.IsValidModel(model) and util.IsValidProp(model)) then return false end
 
 		local sf = MakeComponent("starfall_screen", ply, Vector(), Angle(), model)
@@ -158,6 +161,8 @@ function TOOL:LeftClick(trace)
 
 	elseif component_type == "2" then
 		local model = self:GetClientInfo("ModelHUD")
+
+		if not self:CanUseModel(model) then return false end
 
 		local sf = MakeComponent("starfall_hud", ply, Vector(), Angle(), model)
 		if not sf then return false end
@@ -312,12 +317,12 @@ if CLIENT then
 		local modelPanel = vgui.Create("DPanelSelect", panel)
 		modelPanel:EnableVerticalScrollbar()
 		modelPanel:SetTall(66 * 5 + 2)
-		for model, v in pairs(scripted_ents.GetStored("starfall_screen").t.Monitor_Offsets) do
+		for model, v in pairs(list.Get("Starfall_component_Models")) do
 			local icon = vgui.Create("SpawnIcon")
 			icon:SetModel(model)
 			icon.Model = model
 			icon:SetSize(64, 64)
-			icon:SetTooltip(v.Name)
+			icon:SetTooltip(model)
 			icon.OpenMenu = function( button )
 				local menu = DermaMenu()
 				menu:AddOption( "#spawnmenu.menu.copy", function() SetClipboardText( model ) end ):SetIcon( "icon16/page_copy.png" )
@@ -340,4 +345,10 @@ if CLIENT then
 		panel:AddControl("ComboBox", cbox)
 
 	end
+end
+
+local ALLOWED_MODELS = list.Get("Starfall_component_Models")
+
+function TOOL:CanUseModel(model)
+	return ALLOWED_MODELS[model]
 end

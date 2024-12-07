@@ -130,6 +130,12 @@ function TOOL:LeftClick(trace)
 		if model == "" then
 			model = self:GetClientInfo("Model")
 		end
+
+		if not self:CanUseModel(model) then
+			SF.AddNotify(ply, "Invalid chip model specified: " .. model, "ERROR", 7, "ERROR1")
+			return false
+		end
+
 		if not pcall(SF.CheckModel, model, ply, true) then
 			SF.AddNotify(ply, "Invalid chip model specified: " .. model, "ERROR", 7, "ERROR1")
 			return false
@@ -345,4 +351,14 @@ if CLIENT then
 	else
 		hook.Add("PlayerBindPress", "sf_toolswitch", hookfunc)
 	end
+end
+
+local ALLOWED_MODELS = {}
+if ModelPlug then
+	ALLOWED_MODELS = ModelPlug.GetListAsLookup("Wire_gate_Models")
+end
+table.Merge(ALLOWED_MODELS, list.Get("Starfall_gate_Models"))
+
+function TOOL:CanUseModel(model)
+	return ALLOWED_MODELS[model]
 end
