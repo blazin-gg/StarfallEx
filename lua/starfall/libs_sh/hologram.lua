@@ -122,6 +122,7 @@ function hologram_library.create(pos, ang, model, scale)
 			holoent:SetAngles(ang)
 			holoent:SetModel(model)
 			holoent:Spawn()
+			holoent:CPPISetOwner(ply)
 
 			if CPPI then holoent:CPPISetOwner(ply == SF.Superuser and NULL or ply) end
 
@@ -142,6 +143,7 @@ function hologram_library.create(pos, ang, model, scale)
 			holoent:SetModel(model)
 			debug.setmetatable(holoent, cl_hologram_meta)
 			holoent:Spawn()
+			holoent:CPPISetOwner(ply)
 
 			if scale~=nil then
 				holoent:SetScale(scale)
@@ -230,13 +232,13 @@ else
 		checkpermission(instance, holo, "hologram.setRenderProperty")
 
 		holo:SetAngles(aunwrap(ang))
-		
+
 		local sfParent = holo.sfParent
 		if sfParent and IsValid(sfParent.parent) then
 			sfParent:updateTransform()
 		end
 	end
-	
+
 	--- Sets the hologram's position local to its parent.
 	-- @shared
 	-- @param Vector vec New position
@@ -260,7 +262,7 @@ else
 		checkpermission(instance, holo, "hologram.setRenderProperty")
 
 		holo:SetLocalAngles(aunwrap(ang))
-		
+
 		local sfParent = holo.sfParent
 		if sfParent and IsValid(sfParent.parent) then
 			sfParent:updateTransform()
@@ -535,7 +537,7 @@ end
 function hologram_methods:setRenderGroup(group)
 	local holo = getholo(self)
 	checkpermission(instance, holo, "entities.setRenderProperty")
-	
+
 	if group then
 		checkluatype(group, TYPE_NUMBER)
 		if not SF.allowedRenderGroups[group] then SF.Throw("Invalid rendergroup!") end

@@ -71,6 +71,7 @@ function props_library.create(pos, ang, model, frozen)
 	propent:SetAngles(ang)
 	propent:SetModel(model)
 	propent:Spawn()
+	propent:CPPISetOwner(ply)
 	entList:register(instance, propent)
 
 	if not propent:GetModel() then propent:Remove() SF.Throw("Invalid model", 2) end
@@ -119,6 +120,7 @@ function props_library.createRagdoll(model, frozen)
 	local ent = ents.Create("prop_ragdoll")
 	ent:SetModel(model)
 	ent:Spawn()
+	ent:CPPISetOwner(ply)
 	entList:register(instance, ent)
 
 	if not ent:GetModel() then ent:Remove() SF.Throw("Invalid model", 2) end
@@ -211,6 +213,7 @@ function props_library.createCustom(pos, ang, vertices, frozen)
 	propent:SetAngles(ang)
 	propent.Mesh = uwVertices
 	propent:Spawn()
+	propent:CPPISetOwner(ply)
 	entList:register(instance, propent, function()
 		plyVertexCount:free(ply, totalVertices)
 	end)
@@ -283,6 +286,7 @@ function props_library.createComponent(pos, ang, class, model, frozen)
 	comp:SetAngles(ang)
 	comp:SetModel(model)
 	comp:Spawn()
+	comp:CPPISetOwner(ply)
 	entList:register(instance, comp)
 
 	local mdl = comp:GetModel()
@@ -377,6 +381,7 @@ function props_library.createSeat(pos, ang, model, frozen)
 	prop:Spawn()
 	prop:SetKeyValue( "limitview", 0 )
 	prop:Activate()
+	prop:CPPISetOwner(ply)
 
 	entList:register(instance, prop)
 
@@ -445,6 +450,7 @@ function props_library.createSent(pos, ang, class, frozen, data)
 			entity:SetAngles(ang)
 			entity:Spawn()
 			entity:Activate()
+			entity:CPPISetOwner(ply)
 		end
 
 		hookcall = "PlayerSpawnedSWEP"
@@ -464,6 +470,7 @@ function props_library.createSent(pos, ang, class, frozen, data)
 				entity:SetAngles(ang)
 				entity:Spawn()
 				entity:Activate()
+				entity:CPPISetOwner(ply)
 			end
 		end
 
@@ -500,6 +507,7 @@ function props_library.createSent(pos, ang, class, frozen, data)
 			entity:SetAngles(ang)
 			entity:Spawn()
 			entity:Activate()
+			entity:CPPISetOwner(ply)
 		end
 
 		hookcall = "PlayerSpawnedNPC"
@@ -547,6 +555,7 @@ function props_library.createSent(pos, ang, class, frozen, data)
 			entity:SetAngles(ang)
 			entity:Spawn()
 			entity:Activate()
+			entity:CPPISetOwner(ply)
 		end
 
 		hookcall = "PlayerSpawnedVehicle"

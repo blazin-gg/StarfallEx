@@ -98,6 +98,7 @@ function nextbot_library.create(pos, mdl)
 	nb.instance = instance
 	nb:Spawn()
 	nb:SetCreator(ply)
+	nb:CPPISetOwner(ply)
 	entList:register(instance, nb)
 
 	if CPPI then nb:CPPISetOwner(ply == SF.Superuser and NULL or ply) end
@@ -144,7 +145,7 @@ function nb_methods:getApproachPos()
 	local nb = nbunwrap(self)
 	if nb.approachPos then
 		return vwrap(nb.approachPos)
-	else return nil 
+	else return nil
 	end
 end
 
@@ -172,7 +173,7 @@ function nb_methods:getGotoPos()
 	local nb = nbunwrap(self)
 	if nb.goTo then
 		return vwrap(nb.goTo)
-	else return nil 
+	else return nil
 	end
 end
 
@@ -198,7 +199,7 @@ end
 --- Makes the nextbot face towards a specified position. Has to be called continuously to be effective.
 -- @server
 -- @param Vector facepos Position to face towards.
-function nb_methods:faceTowards(pos)	
+function nb_methods:faceTowards(pos)
 	local nb = nbunwrap(self)
 	checkpermission(instance, nb, "nextbot.faceTowards")
 	nb.loco:FaceTowards(vunwrap(pos))
@@ -471,7 +472,7 @@ end
 --- Gets the move speed of the NextBot.
 -- @server
 -- @return number NB's move speed.
-function nb_methods:getMoveSpeed()	
+function nb_methods:getMoveSpeed()
 	local nb = nbunwrap(self)
 	return nb.MoveSpeed
 end
@@ -607,7 +608,7 @@ end
 function nb_methods:isAreaTraversable(nav)
 	local nb = nbunwrap(self)
 	local unav = navunwrap(nav)
-	
+
 	return nb.loco:IsAreaTraversable(unav)
 end
 
