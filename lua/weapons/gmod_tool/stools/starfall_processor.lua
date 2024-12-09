@@ -1,5 +1,5 @@
 TOOL.Category		= "Starfall"
-TOOL.Name			= "Starfall - Processor"
+TOOL.Name			= "Processor"
 TOOL.Command		= nil
 TOOL.ConfigName		= ""
 
@@ -46,6 +46,7 @@ if SERVER then
 		end
 
 		if pl then
+			sf:CPPISetOwner(pl)
 			pl:AddCount("starfall_processor", sf)
 			pl:AddCleanup("starfall_processor", sf)
 		end
@@ -136,10 +137,6 @@ function TOOL:LeftClick(trace)
 			return false
 		end
 
-		if not pcall(SF.CheckModel, model, ply, true) then
-			SF.AddNotify(ply, "Invalid chip model specified: " .. model, "ERROR", 7, "ERROR1")
-			return false
-		end
 		if not self:GetSWEP():CheckLimit("starfall_processor") then return false end
 
 		local Ang = trace.HitNormal:Angle()
@@ -287,8 +284,8 @@ if CLIENT then
 		panel:AddControl("Header", { Text = "#Tool.starfall_processor.name", Description = "#Tool.starfall_processor.desc" })
 		panel:AddControl("CheckBox", { Label = "#Tool.starfall_processor.parent", Command = "starfall_processor_parent" } )
 
-		local gateModels = list.Get("Starfall_gate_Models")
-		table.Merge(gateModels, list.Get("Wire_gate_Models"))
+		local gateModels = list.Get("Wire_gate_Models")
+		table.Merge(gateModels, list.Get("Starfall_gate_Models"))
 
 		local modelPanel = vgui.Create("DPanelSelect", panel)
 		modelPanel:EnableVerticalScrollbar()

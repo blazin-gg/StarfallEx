@@ -1,6 +1,6 @@
 TOOL.Category		= "Starfall"
 TOOL.Wire_MultiCategories = { "Chips, Gates" }
-TOOL.Name			= "Starfall - Components"
+TOOL.Name			= "Components"
 TOOL.Command		= nil
 TOOL.ConfigName		= ""
 
@@ -30,6 +30,7 @@ if SERVER then
 		sf:SetModel(model)
 		sf:Spawn()
 
+		sf:CPPISetOwner(pl)
 		pl:AddCount("starfall_components", sf)
 		pl:AddCleanup("starfall_components", sf)
 
@@ -126,7 +127,7 @@ function TOOL:LeftClick(trace)
 	local component_type = self:GetClientInfo("Type")
 	if component_type == "1" then
 		local model = self:GetClientInfo("Model")
-		
+
 		if not self:CanUseModel(model) then return false end
 
 		if not (util.IsValidModel(model) and util.IsValidProp(model)) then return false end
