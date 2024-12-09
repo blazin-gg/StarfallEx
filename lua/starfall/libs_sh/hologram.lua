@@ -143,7 +143,6 @@ function hologram_library.create(pos, ang, model, scale)
 			holoent:SetModel(model)
 			debug.setmetatable(holoent, cl_hologram_meta)
 			holoent:Spawn()
-			holoent:CPPISetOwner(ply)
 
 			if scale~=nil then
 				holoent:SetScale(scale)
