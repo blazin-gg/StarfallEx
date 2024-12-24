@@ -1,7 +1,17 @@
 -- Global to all starfalls
+local checkluatype = SF.CheckLuaType
 local registerprivilege = SF.Permissions.registerPrivilege
 
-if SERVER then registerprivilege("blast.create", "Blast damage", "Allows the user to create explosions", { usergroups = { default = 1 } }) end
+if SERVER then
+	registerprivilege("game.blastDamage", "Create explosions", "Allows the user to create explosions", { usergroups = { default = 1 } })
+	registerprivilege("game.bulletDamage", "Fire bullets", "Allows the user to fire bullets", {})
+end
+
+local fireBulletsBurst = SERVER and SF.BurstObject("bullets", "bullets", 40, 40, " bullets fired per second", "Number of bullets that can be fired in a short time")
+local fireBulletsDPSBurst = SERVER and SF.BurstObject("bullets_damage", "bullet damage", 100, 100, " bullets damage per second", "Damage per second bullets can deal")
+
+local maxBulletForce = SERVER and CreateConVar("sf_bullets_maxforce", 100, FCVAR_ARCHIVE, "Maximum amount of force a bullet can have", 0)
+local maxBulletHull = SERVER and CreateConVar("sf_bullets_maxhull", 10, FCVAR_ARCHIVE, "Maximum hull size a bullet can have", 0)
 
 --- Game functions
 -- @name game
@@ -13,8 +23,13 @@ return function(instance)
 local checkpermission = instance.player ~= SF.Superuser and SF.Permissions.check or function() end
 
 local game_library = instance.Libraries.game
-local ewrap, eunwrap = instance.Types.Entity.Wrap, instance.Types.Entity.Unwrap
-local vwrap, vunwrap = instance.Types.Vector.Wrap, instance.Types.Vector.Unwrap
+local ent_methods, ent_meta, ewrap, eunwrap = instance.Types.Entity.Methods, instance.Types.Entity, instance.Types.Entity.Wrap, instance.Types.Entity.Unwrap
+local vec_methods, vec_meta, vwrap, vunwrap = instance.Types.Vector.Methods, instance.Types.Vector, instance.Types.Vector.Wrap, instance.Types.Vector.Unwrap
+
+local vunwrap1, vunwrap2, vunwrap3
+instance:AddHook("initialize", function()
+	vunwrap1, vunwrap2, vunwrap3 = vec_meta.QuickUnwrap1, vec_meta.QuickUnwrap2, vec_meta.QuickUnwrap3
+end)
 
 --- Returns the map name
 -- @name game_library.getMap
@@ -65,11 +80,17 @@ game_library.isMounted = IsMounted
 -- @return number Time scale
 game_library.getTimeScale = game.GetTimeScale
 
---- Returns the number of seconds between each gametick
+--- Returns the expected number of seconds between each gametick
 -- @name game_library.getTickInterval
 -- @class function
--- @return number Interval
+-- @return number Time interval in seconds
 game_library.getTickInterval = engine.TickInterval
+
+--- Returns the measured number of seconds between each gametick
+-- @name game_library.getRealTickInterval
+-- @class function
+-- @return number Time interval in seconds
+game_library.getRealTickInterval = engine.AbsoluteFrameTime
 
 --- Returns the number of ticks since the game started
 -- @name game_library.getTickCount
@@ -130,8 +151,88 @@ if SERVER then
 	-- @param number damageRadius The radius in which entities will be damaged (0 - 1500)
 	-- @param number damage The amount of damage to be applied
 	function game_library.blastDamage(damageOrigin, damageRadius, damage)
-		checkpermission(instance, nil, "blast.create")
-		util.BlastDamage(instance.entity, instance.player, vunwrap(damageOrigin), math.Clamp(damageRadius, 0, 1500), damage)
+		checkpermission(instance, nil, "game.blastDamage")
+		util.BlastDamage(instance.entity, instance.player, vunwrap1(damageOrigin), math.Clamp(damageRadius, 0, 1500), damage)
+	end
+
+	--- Fires a bullet. Bullet made with this function will not have any tracer, you will have to make them yourself.
+	-- @server
+	-- @param Vector src The position to fire the bullets from.
+	-- @param Vector Dir The fire direction.
+	-- @param number? damage The damage dealt by the bullet. Default: (1-100)
+	-- @param number? num The amount of bullets to fire. Default: (1-40)
+	-- @param number? force The force of the bullets. Default: (0-100)
+	-- @param number? distance Maximum distance the bullet can travel.
+	-- @param Vector? Spread The spread, only x and y are needed.
+	-- @param number? hullSize The hull size of the bullet. Default: (0-10)
+	-- @param Entity? ignoreEntity The entity that the bullet will ignore when it will be shot.
+	-- @param function? callback Function to be called with attacker, traceResult after the bullet was fired but before the damage is applied (the callback is called even if no damage is applied).
+	function game_library.bulletDamage(src, dir, damage, num, force, distance, spread, hullSize, ignoreEntity, cb)
+		checkpermission(instance, nil, "game.bulletDamage")
+		src = vunwrap1(src)
+		dir = vunwrap2(dir)
+		if spread ~= nil then spread = vunwrap3(spread) end
+		if damage ~= nil then checkluatype(damage, TYPE_NUMBER) damage = math.Clamp(damage, 1, fireBulletsDPSBurst.max) end
+		if force ~= nil then checkluatype(force, TYPE_NUMBER) force = math.Clamp(force, 0, maxBulletForce:GetInt()) else force = 0 end
+		if distance ~= nil then checkluatype(distance, TYPE_NUMBER) distance = math.Clamp(distance, 0, 56756) end
+		if hullSize ~= nil then checkluatype(hullSize, TYPE_NUMBER) hullSize = math.Clamp(hullSize, 0, maxBulletHull:GetInt()) end
+		if num ~= nil then checkluatype(num, TYPE_NUMBER) num = math.Clamp(num, 1, fireBulletsBurst.max) end
+		if ignoreEntity ~= nil then ignoreEntity = eunwrap(ignoreEntity) end
+
+		local callback
+
+		if cb then
+			checkluatype(cb, TYPE_FUNCTION)
+			callback = function(attacker, tr, dmginfo)
+				instance:runFunction(cb, instance.WrapObject(attacker), SF.StructWrapper(instance, tr, "TraceResult"))
+			end
+		end
+
+		local BulletInfo = {
+			Src = src,
+			Dir = dir,
+			Attacker = instance.player,
+			Damage = damage,
+			Force = force,
+			Distance = distance,
+			Num = num,
+			Tracer = 0,
+			TracerName = "",
+			Spread = spread,
+			HullSize = hullSize,
+			IgnoreEntity = ignoreEntity,
+			Callback = callback,
+		}
+
+		fireBulletsBurst:use(instance.player, BulletInfo.Num)
+		fireBulletsDPSBurst:use(instance.player, BulletInfo.Damage * BulletInfo.Num)
+
+		instance.entity:FireBullets(BulletInfo)
+	end
+
+	--- Return if the given bullets can be fired.
+	-- @server
+	-- @param number damage The damage dealt by the bullet. (1-100)
+	-- @param number num The amount of bullets to fire. (1-5)
+	-- @return boolean true if the given bullets can be fired or else false
+	function game_library.canFireBullets(damage, num)
+		checkluatype(damage, TYPE_NUMBER)
+		checkluatype(num, TYPE_NUMBER)
+		return (fireBulletsBurst:check(instance.player) >= num and fireBulletsDPSBurst:check(instance.player) >= damage * num)
+	end
+
+	--- Return the amount of bullets left to fire
+	-- @server
+	-- @return number Number of bullets left to fire
+	function game_library.bulletsLeft()
+		return fireBulletsBurst:check(instance.player)
+	end
+
+	--- Return the amount of damage left bullets can deal
+	-- @server
+	-- @return number Damage left bullets can deal
+	function game_library.bulletsDPSLeft()
+		return fireBulletsDPSBurst:check(instance.player)
 	end
 
 else
@@ -157,7 +258,7 @@ else
 	-- @param Vector position The position to check the skybox visibility from
 	-- @return boolean Whether the skybox is visible from the position
 	function game_library.isSkyboxVisibleFromPoint(position)
-		return util.IsSkyboxVisibleFromPoint(vunwrap(position))
+		return util.IsSkyboxVisibleFromPoint(vunwrap1(position))
 	end
 
 	--- Returns the server's frame time and standard deviation
