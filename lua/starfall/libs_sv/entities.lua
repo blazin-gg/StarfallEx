@@ -3,7 +3,7 @@ local checkluatype = SF.CheckLuaType
 local registerprivilege = SF.Permissions.registerPrivilege
 local haspermission = SF.Permissions.hasAccess
 local dgetmeta = debug.getmetatable
-local ENT_META,NPC_META,PHYS_META,PLY_META,VEH_META,WEP_META = FindMetaTable("Entity"),FindMetaTable("Npc"),FindMetaTable("PhysObj"),FindMetaTable("Player"),FindMetaTable("Vehicle"),FindMetaTable("Weapon")
+local ENT_META,NPC_META,PHYS_META,PLY_META,VEH_META,WEP_META = FindMetaTable("Entity"),FindMetaTable("NPC"),FindMetaTable("PhysObj"),FindMetaTable("Player"),FindMetaTable("Vehicle"),FindMetaTable("Weapon")
 local isentity = isentity
 
 local Ent_AddCallback,Ent_GetTable,Ent_IsScripted,Ent_IsValid,Ent_RemoveCallback = ENT_META.AddCallback,ENT_META.GetTable,ENT_META.IsScripted,ENT_META.IsValid,ENT_META.RemoveCallback
@@ -1059,7 +1059,7 @@ function ents_methods:testPVS(other)
 	local meta = debug.getmetatable(other)
 	if meta==vec_meta then
 		other = vunwrap1(other)
-	elseif meta==ent_meta then
+	elseif meta==ent_meta or (meta and meta.supertype == ent_meta) then
 		other = getent(other)
 	else
 		SF.ThrowTypeError("Entity or Vector", SF.GetType(other), 2)
