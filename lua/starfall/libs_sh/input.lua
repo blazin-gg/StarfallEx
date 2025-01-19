@@ -109,14 +109,14 @@ if game.SinglePlayer() then
 else
 	--- Called when a button is pressed
 	-- @client
-	-- @name inputPressed
+	-- @name InputPressed
 	-- @class hook
 	-- @param number button Number of the button
 	SF.hookAdd("PlayerButtonDown", "inputpressed", CheckButtonPerms)
 	
 	--- Called when a button is released
 	-- @client
-	-- @name inputReleased
+	-- @name InputReleased
 	-- @class hook
 	-- @param number button Number of the button
 	SF.hookAdd("PlayerButtonUp", "inputreleased", CheckButtonPerms)
@@ -124,7 +124,7 @@ end
 
 --- Called when a keybind is pressed
 -- @client
--- @name inputBindPressed
+-- @name InputBindPressed
 -- @class hook
 -- @param string bind Name of keybind pressed
 SF.hookAdd("PlayerBindPress", "inputbindpressed", function(instance, ply, bind)
@@ -136,7 +136,7 @@ end)
 
 --- Called when the mouse is moved
 -- @client
--- @name mousemoved
+-- @name MouseMoved
 -- @class hook
 -- @param number x X coordinate moved
 -- @param number y Y coordinate moved
@@ -152,7 +152,7 @@ end)
 
 --- Called when the mouse wheel is rotated
 -- @client
--- @name mouseWheeled
+-- @name MouseWheeled
 -- @class hook
 -- @param number delta Rotate delta
 SF.hookAdd("StartCommand", "mousewheeled", function(instance, ply, cmd)
@@ -396,5 +396,12 @@ function input_library.isGameUIVisible()
 	return gui.IsGameUIVisible()
 end
 
+--- Returns the digital value of an analog stick on the current (set up via convars) controller.
+-- @name input_library.getAnalogValue
+-- @class function
+-- @client
+-- @param number axis The analog axis to poll. See https://wiki.facepunch.com/gmod/Enums/ANALOG
+-- @return number The digital value.
+input_library.getAnalogValue = input.GetAnalogValue
 
 end
